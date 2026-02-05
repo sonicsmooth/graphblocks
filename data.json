@@ -1,0 +1,24 @@
+
+{"shapes": [
+    {"rect": {
+       "name": "nikorect",
+       "lineWidth": 8,
+       "lineColor": "#00ff00",
+       "pos": {"x": 0, "y": 0},
+       "size": {"w": 75, "h": 25}}},
+    {"rect": {
+       "name": "helenarect",
+       "lineWidth": 7.5,
+       "lineColor": "Purple",
+       "pos": {"x": 20, "y": 60},
+       "size": {"w": 76, "h": 27}}},
+    {"instance": {
+      "name": "mamarect", 
+      "nameRef": "nikorect",   
+      "pos": {"x":25, "y": 200}}},
+    {"instance": {
+      "name": "dadarect", 
+      "nameRef": "helenarect",   
+      "pos": {"x":50, "y": 55}}}
+  ]
+}
