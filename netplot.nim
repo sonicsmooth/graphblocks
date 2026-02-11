@@ -1,4 +1,5 @@
-import jsony
+import strutils
+import json, jsony
 import pixie
 # import winim
 
@@ -104,14 +105,45 @@ proc drawBasicPlot(w,h: int, shapes: seq[Shape], filepath: string) =
     shape.draw(ctx)
   image.writeFile(filepath)
   
+type
+  ValueKind = enum vkInt, vkStr
+  JValue = object
+    case kind: ValueKind
+    of vkInt:
+      valInt: int
+    of vkStr: 
+      valStr: string
+
+  # JPoint = object
+  #   x: int
+  #   y: int
+
+  # JLineseg = object
+  #   p1: Point
+  #   p2: Point
+
+type JInt = distinct int
+
+proc parseHook*(s: string, i: var int, val: var JInt) =
+  echo "in pareshook: ", s
+  i = i + s.len
+  val = parseInt(s).JInt
 
 when isMainModule:
-  let shapes = loadData("data.json")
-  drawBasicPlot(600, 300, shapes, "outfile.png")
+  # let shapes = loadData("data.json")
+  # drawBasicPlot(600, 300, shapes, "outfile.png")
 
-  let junk = """{"x": 10, "y": 20}"""
-  let p = junk.fromJson(Point)
-  echo p
+  let a = fromJson("$var", JInt)
+
+  echo a.int
+
+  # let junk = """{"valInt": 10}"""
+  # let p = junk.fromJson(JValue)
+  # echo p
+  #echo p.valInt
+  #echo p.valStr
+
+
 
 
 
