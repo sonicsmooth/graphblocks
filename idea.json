@@ -1,47 +1,21 @@
-
-{"shapes": [
-    {"rect": {
-       "name": "nikorect",
-       "linewidth": 5,
-       "linecolor": "0xffcc00",
-       "pos": {"x": 10, "y": 20},
-       "size": {"w": 75, "h": 25}}},
-    {"rect": {
-       "name": "mamarect",
-       "ref": true,
-       "linewidth": 5,
-       "linecolor": "Pink",
-       "pos": {"x": 0, "y": 0},
-       "size": {"w": 75, "h": 25}}},
-    {"rect": {
-       "name": "helenarect",
-       "ref": true,
-       "coords": "0, 0, 80, 20",
-       "linewidth": 10,
-       "linecolor": "Blue"}},
-    {"pline": {
-      "points": [{"x": 195, "y": 195},
-                  {"x": 5,   "y": 195},
-                  {"x": 170, "y": 100}],
-      "linewidth": 3,
-      "linecolor": "Blue"}},
-    {"line": {
-      "coords": "(195,195), (5,195), (170, 100)",
-      "linewidth": 9,
-      "linecolor": "Green"}
-    }],
-  "instances": [
-    {"ref": "mamarect",   
-     "name": "r1", 
-     "pos": {"x":60, "y": 30}},
-    {"ref": "mamarect",   
-     "name": "r2", 
-     "pos": {"x":5, "y": 35}},
-    {"ref": "helenarect", 
-     "name": "r3", 
-     "pos": {"x":75,  "y": 150}},
-    {"ref": "helenarect", 
-     "name": "r4", 
-     "pos": {"x":150, "y": 100}}
+{
+  "vars": [
+    {
+      "myvar": {
+        "type": "int",
+        "value": 10
+      }
+    }
+  ],
+  "shapes": [
+    {
+      "Rect": {
+        "name": "myrect",
+        "x": 5,
+        "y": "$myvar",
+        "w": 20,
+        "h": 30
+      }
+    }
   ]
 }

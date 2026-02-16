@@ -1,24 +1,12 @@
-
-{"shapes": [
-    {"rect": {
-       "name": "nikorect",
-       "lineWidth": 8,
-       "lineColor": "#00ff00",
-       "pos": {"x": 0, "y": 0},
-       "size": {"w": 75, "h": 25}}},
-    {"rect": {
-       "name": "helenarect",
-       "lineWidth": 7.5,
-       "lineColor": "Purple",
-       "pos": {"x": 20, "y": 60},
-       "size": {"w": 76, "h": 27}}},
-    {"instance": {
-      "name": "mamarect", 
-      "nameRef": "nikorect",   
-      "pos": {"x":25, "y": 200}}},
-    {"instance": {
-      "name": "dadarect", 
-      "nameRef": "helenarect",   
-      "pos": {"x":50, "y": 55}}}
-  ]
+{
+  "vars": {
+    "myvar1": { "kind": "vkFloat",  "floatVal": 10.23   },
+    "myvar2": { "kind": "vkInt",    "intVal": 6         },
+    "myvar3": { "kind": "vkString", "strVal": "monkeys"},
+    "myvar4": { "kind": "vkString", "strVal": "horses"}
+  },
+  "shapes": {
+    "rect1": {"kind": "skRect", "x": 5.0, "y": 5.0, "w": 10.2, "h": 11.4},
+    "line1": {"kind": "skLine", "x0":1, "y0":2, "x1":3, "y1":4}
+  }
 }
