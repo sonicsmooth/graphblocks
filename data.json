@@ -1,12 +1,36 @@
 {
   "vars": {
-    "myvar1": { "kind": "vkFloat",  "floatVal": 10.23   },
-    "myvar2": { "kind": "vkInt",    "intVal": 6         },
-    "myvar3": { "kind": "vkString", "strVal": "monkeys"},
-    "myvar4": { "kind": "vkString", "strVal": "horses"}
+    "myvar1": {
+      "kind": "vkFloat",
+      "floatVal": 3.5
+    },
+    "myvar2": {
+      "kind": "vkInt",
+      "intVal": 6
+    },
+    "myvar3": {
+      "kind": "vkString",
+      "strVal": "monkeys"
+    },
+    "myvar4": {
+      "kind": "vkString",
+      "strVal": "horses"
+    }
   },
   "shapes": {
-    "rect1": {"kind": "skRect", "x": 5.0, "y": 5.0, "w": 10.2, "h": 11.4},
-    "line1": {"kind": "skLine", "x0":1, "y0":2, "x1":3, "y1":4}
+    "rect1": {
+      "kind": "skRect",
+      "x": "myvar1",
+      "y": 5.0,
+      "w": 10.2,
+      "h": 11.4
+    },
+    "line1": {
+      "kind": "skLine",
+      "x0": "myvar1",
+      "y0": 2,
+      "x1": 3,
+      "y1": 4
+    }
   }
 }
