@@ -2,7 +2,7 @@
   "vars": {
     "myvar1": {
       "kind": "vkFloat",
-      "floatVal": 10.23
+      "floatVal": 3.5
     },
     "myvar2": {
       "kind": "vkInt",
@@ -20,17 +20,14 @@
   "shapes": {
     "rect1": {
       "kind": "skRect",
-      "x": "myvar1",
-      "y": 5.0,
+      "pos": (10, 20),
       "w": 10.2,
       "h": 11.4
     },
     "line1": {
       "kind": "skLine",
-      "x0": 1,
-      "y0": 2,
-      "x1": 3,
-      "y1": 4
+      "pt0": ("myvar1", 2),
+      "pt1": (3, 4)
     }
   }
 }
