@@ -64,14 +64,17 @@ proc parseHook(s: string, i: var int, val: var JVal) =
   parseHook(s, i, xi)
   # var x = new int
   # x[] = xi
+  echo "creating jval"
   val = JVal(kind: vkInt, intVal: xi)
+  echo "created jval: ", val
 
   
 proc parseHook(s: string, i: var int, val: var JPoint) =
-  echo "Parsing point at index ", i
+  echo "Parsing JPoint at index ", i
   # Parse (x, y)
   eatChar(s, i, '(')
   var x,y: JVal
+  echo "default kind: ", x.kind
   parseHook(s, i, x)
   eatChar(s, i, ',')
   parseHook(s, i, y)
@@ -98,23 +101,26 @@ proc parseHook(s: string, i: var int, val: var JPoint) =
 proc `$`(x: ref SomeNumber):    string = $x[]
 proc `$`(x: ref string): string = "\"" & x[] & "\""
 
-echo "Doing JPoint"
-echo """ (1, 2)  """.fromJson(JPoint)
-echo ""
+try:
 
-echo "Doing seq of JPoints"
-echo """ [(1, 2), (3, 4)]  """.fromJson(seq[JPoint])
-echo ""
+  # echo "Doing JPoint"
+  # echo """ (1, 2)  """.fromJson(JPoint)
+  # echo ""
 
-echo "Doing JShape with line"
-echo """{"kind": "skLine", "pt0": (1, 2), "pt1": (3, 4)}""".fromJson(JShape)
-echo ""
+  # echo "Doing seq of JPoints"
+  # echo """ [(1, 2), (3, 4)]  """.fromJson(seq[JPoint])
+  # echo ""
 
-echo "doing JShape with polyline"
-echo """{"kind": "skPolyLine", "pts": [(1, 2), (3, 4)]}""".fromJson(JShape)
-echo ""
+  # echo "Doing JShape with line"
+  # echo """{"kind": "skLine", "pt0": (1, 2), "pt1": (3, 4)}""".fromJson(JShape)
+  # echo ""
 
+  echo "doing JShape with polyline"
+  echo """{"kind": "skPolyLine", "pts": [(1, 2), (3, 4)]}""".fromJson(JShape)
+  echo ""
 
+except Exception as e:
+  echo e.getStackTrace()
 
 
 # proc newRefInt(name: string, val: int): ref JVal =
