@@ -1,1 +1,13 @@
-{"kind": "skLine", "pt0": "(12, 34)" , "pt1": "(56, 78)" }
+{
+  "shapes": {
+    "line1": {
+      "kind": "skLine",
+      "pt0": "(12, 34)",
+      "pt1": "(56, 78)"
+    },
+    "line2": {
+      "kind": "skPolyLine",
+      "pts": ["(12, 34)", "($var1, 78)", "(someX, someY)"]
+    }
+  }
+}

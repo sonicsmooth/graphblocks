@@ -7,27 +7,19 @@ type
   VarKind = enum vkInt, vkFloat, vkString
   JVal = object
     case kind: VarKind
-    of vkInt: intVal: int
-    of vkFloat: floatVal: float
-    of vkString: strVal: string
-
-  # # JValRef = int
-  # JValRef = object of RootObj
-  #   case kind: VarKind 
-  #   else: intVal: int
-  #   # of vkInt: intVal: ref int
-  #   # of vkFloat: floatVal: ref float
-  #   # of vkString: stringVal: ref string
+    of vkInt: intVal: ref int
+    of vkFloat: floatVal: ref float
+    of vkString: strVal: ref string
 
   JPoint = object of RootObj
     x, y: JVal
 
-  ShapeKind = enum skRect, skLine, skPolyLine
+  ShapeKind = enum skPolyLine, skLine
   JShape = object
     case kind: ShapeKind
-    of skRect:
-      pos: JPoint
-      w, h: JVal
+    # of skRect:
+    #   pos: JPoint
+    #   w, h: JVal
     of skLine:
       pt0: JPoint
       pt1: JPoint
@@ -37,89 +29,77 @@ type
     vars: Table[string, JVal]
     shapes: Table[string, JShape]
 
-# proc parseHook(s: string, i: var int, val: var JValRef) =
-#   var xf: float
-#   var xi: int
-#   var xs: string
-#   var ii = i
-#   try:
-#     parseHook(s, i, xf)
-#     parseHook(s, ii, xi)
-#     if xf.round == xf:
-#       var x = new int
-#       x[] = xi
-#       val = JValRef(kind: vkInt, intVal: x)
-#     else:
-#       var x = new float
-#       x[] = xf
-#       val = JValRef(kind: vkFloat, floatVal: x)
-#   except Exception as e:
-#     parseHook(s, i, xs)
-#     var x = new string
-#     x[] = xs
-#     val = JValRef(kind: vkString, stringVal: x)
-
 proc parseHook(s: string, i: var int, val: var JVal) =
+  var xf: float
   var xi: int
-  parseHook(s, i, xi)
-  # var x = new int
-  # x[] = xi
-  echo "creating jval"
-  val = JVal(kind: vkInt, intVal: xi)
-  echo "created jval: ", val
+  var ii = i
+  try:
+    parseHook(s, i, xf)
+    parseHook(s, ii, xi)
+    if xf.round == xf:
+      var xref = new int
+      xref[] = xi
+      val = JVal(kind: vkInt, intVal: xref)
+    else:
+      var xref = new float
+      xref[] = xf
+      val = JVal(kind: vkFloat, floatVal: xref)
+  except Exception as e:
+    # Advance until whitespace, comma, or ), then copy string segment
+    # Copied with minor modifications from parseSymbol in jsony.nim
+    var j = i
+    while i < s.len:
+      if s[i] in {')', ',', ' ', '\t', '\n', '\r'}:
+        break
+      inc i
+    
+    var xref = new string
+    xref[] = s[j ..< i]
+    val = JVal(kind: vkString, strVal: xref)
 
-  
 proc parseHook(s: string, i: var int, val: var JPoint) =
-  echo "Parsing JPoint at index ", i
   # Parse (x, y)
+  var x, y: JVal
+  eatChar(s, i, '"')
   eatChar(s, i, '(')
-  var x,y: JVal
-  echo "default kind: ", x.kind
   parseHook(s, i, x)
   eatChar(s, i, ',')
   parseHook(s, i, y)
   eatChar(s, i, ')')
-  echo "done with point"
+  eatChar(s, i, '"')
   val = JPoint(x: x, y: y)
 
-# proc parseHook(s: string, i: var int, val: var seq[JPoint]) =
-#   echo "Parsing seq of points at index ", i
-#   # Parse ["(x1,y1),(x2,y2)"]
-#   # eatChar(s, i, '"')
-#   eatChar(s, i, '[')
-#   while s[i] != ']':
-#     echo s[i]
-#     var pt: JPoint
-#     parseHook(s, i, pt)
-#     val.add pt
-#     if s[i] == ',':
-#       eatChar(s, i, ',')
-#   eatChar(s, i, ']')
-#   # eatChar(s, i, '"')
-
-
-proc `$`(x: ref SomeNumber):    string = $x[]
-proc `$`(x: ref string): string = "\"" & x[] & "\""
+proc `$`(x: ref SomeNumber): string = "->" & $x[]
+proc `$`(x: ref string): string = "->\"" & x[] & "\""
 
 try:
 
-  # echo "Doing JPoint"
-  # echo """ (1, 2)  """.fromJson(JPoint)
-  # echo ""
+  echo "Doing JPoint"
+  echo """ "(1, 2)"  """.fromJson(JPoint)
+  echo ""
 
-  # echo "Doing seq of JPoints"
-  # echo """ [(1, 2), (3, 4)]  """.fromJson(seq[JPoint])
-  # echo ""
+  echo "Doing seq of JPoints"
+  echo """ ["(1, 2)", "(3, 4)"]  """.fromJson(seq[JPoint])
+  echo ""
 
-  # echo "Doing JShape with line"
-  # echo """{"kind": "skLine", "pt0": (1, 2), "pt1": (3, 4)}""".fromJson(JShape)
-  # echo ""
+  echo "Doing JShape with line"
+  echo """{"kind": "skLine", "pt0": "(1, 2)", "pt1": "(3, 4)"}""".fromJson(JShape)
+  echo ""
 
   echo "doing JShape with polyline"
-  echo """{"kind": "skPolyLine", "pts": [(1, 2), (3, 4)]}""".fromJson(JShape)
+  echo """{"kind": "skPolyLine", "pts": ["(1, 2)", "(3, 4)"]}""".fromJson(JShape)
+  echo ""
+
+  echo "doing JShape with polyline"
+  echo """{"kind": "skPolyLine", "pts": ["(1.5, 2.5)", "($var1, $var2)"]}""".fromJson(JShape)
+  echo ""
+
+  echo "doing doc from file"
+  echo readFile("data.json").fromJson(JDoc)
   echo ""
 
 except Exception as e:
+  echo e.msg
   echo e.getStackTrace()
 
 
@@ -137,7 +117,7 @@ except Exception as e:
 #   result = new JVal
 #   result[] = JVal(kind: rkFloat, name: name, floatVal: fref)
 
-# proc `$`(jvalRef: ref JVal): string = 
+# proc `$`(jvalRef: ref JVal): string =
 #   result = jvalRef.name & ": "
 #   case jvalRef.kind
 #   of rkInt: result = result & $jvalRef.intVal
@@ -160,5 +140,5 @@ except Exception as e:
 # echo varTableRef["myvar3"]
 
 
-  
+
 
