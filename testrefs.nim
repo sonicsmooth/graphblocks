@@ -69,8 +69,8 @@ proc parseHook(s: string, i: var int, val: var JPoint) =
   eatChar(s, i, '"')
   val = JPoint(x: x, y: y)
 
-proc `$`(x: ref SomeNumber): string = "->" & $x[]
-proc `$`(x: ref string): string = "->\"" & x[] & "\""
+proc `$`(x: ref SomeNumber): string = "→" & $x[]
+proc `$`(x: ref string): string = "→\"" & x[] & "\""
 
 try:
 
@@ -86,15 +86,15 @@ try:
   echo """{"kind": "skLine", "pt0": "(1, 2)", "pt1": "(3, 4)"}""".fromJson(JShape)
   echo ""
 
-  echo "doing JShape with polyline"
+  echo "Doing JShape with polyline"
   echo """{"kind": "skPolyLine", "pts": ["(1, 2)", "(3, 4)"]}""".fromJson(JShape)
   echo ""
 
-  echo "doing JShape with polyline"
+  echo "Doing JShape with polyline"
   echo """{"kind": "skPolyLine", "pts": ["(1.5, 2.5)", "($var1, $var2)"]}""".fromJson(JShape)
   echo ""
 
-  echo "doing doc from file"
+  echo "Doing doc from file"
   echo readFile("data.json").fromJson(JDoc)
   echo ""
 
