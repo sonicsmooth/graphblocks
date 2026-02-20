@@ -1,8 +1,13 @@
 { "vars": {
-    "var1": 42,
-    "someX": 100,
-    "theName": "crackhead",
-    "someY": 200
+    "junk1": 3.1415926,
+    "junk2": -3.1415926,
+    "junk3": +3.1415926,
+    "junk4": +1e23,
+    "junk5": -1e-23,
+    "junk6": -1.23e-23,
+    "junk7": +1.23e-23,
+    "junk8": -1.23e23,
+    "junk9": +1.23e23,
   },
   "shapes": {
     "line1": {
@@ -18,7 +23,7 @@
       "kind": "skRect",
       "pos": "(12, 34)",
       "w": "boxWidth",
-      "h": "boxHeight"
+      "h": "boxHeight",
     }
   }
 }
