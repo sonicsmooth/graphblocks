@@ -1,4 +1,9 @@
-{
+{ "vars": {
+    "var1": 42,
+    "someX": 100,
+    "theName": "crackhead",
+    "someY": 200
+  },
   "shapes": {
     "line1": {
       "kind": "skLine",
@@ -7,7 +12,13 @@
     },
     "line2": {
       "kind": "skPolyLine",
-      "pts": ["(12, 34)", "($var1, 78)", "(someX, someY)"]
+      "pts": ["(12, 34)", "(var1, 78)", "(someX, someY)"]
+    },
+    "rect1": {
+      "kind": "skRect",
+      "pos": "(12, 34)",
+      "w": "boxWidth",
+      "h": "boxHeight"
     }
   }
 }

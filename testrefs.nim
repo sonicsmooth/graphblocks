@@ -14,12 +14,14 @@ type
   JPoint = object of RootObj
     x, y: JVal
 
-  ShapeKind = enum skPolyLine, skLine
+  # Looks like the first enum must not be allowed to match the
+  # first field of the variant type else strange bug occurs
+  ShapeKind = enum skPolyLine, skLine, skRect
   JShape = object
     case kind: ShapeKind
-    # of skRect:
-    #   pos: JPoint
-    #   w, h: JVal
+    of skRect:
+      pos: JPoint
+      w, h: JVal
     of skLine:
       pt0: JPoint
       pt1: JPoint
@@ -45,17 +47,30 @@ proc parseHook(s: string, i: var int, val: var JVal) =
       xref[] = xf
       val = JVal(kind: vkFloat, floatVal: xref)
   except Exception as e:
-    # Advance until whitespace, comma, or ), then copy string segment
+    # Didn't parse as number, try parsing as string with optional quotes
+    # Start with optional ", then advance until whitespace, comma, ), or optional closing "
+    # then copy string segment
     # Copied with minor modifications from parseSymbol in jsony.nim
+    var inQuote = s[i] == '"'
+    if inQuote:
+      inc i
     var j = i
     while i < s.len:
-      if s[i] in {')', ',', ' ', '\t', '\n', '\r'}:
+      if (inQuote and s[i] == '"'):
+        break
+      if (s[i] in {')', ',', ' ', '\t', '\n', '\r'}):
         break
       inc i
     
     var xref = new string
-    xref[] = s[j ..< i]
+    if inQuote:
+      xref[] = s[j ..< i]
+      inc i
+    else:
+      xref[] = s[j ..< i+1]
+
     val = JVal(kind: vkString, strVal: xref)
+    echo "found: ", val.strVal[]
 
 proc parseHook(s: string, i: var int, val: var JPoint) =
   # Parse (x, y)
@@ -94,6 +109,14 @@ try:
   echo """{"kind": "skPolyLine", "pts": ["(1.5, 2.5)", "($var1, $var2)"]}""".fromJson(JShape)
   echo ""
 
+  echo "Doing JShape with rect"
+  echo """{"kind": "skRect", "pos": "(12, 34)", "w": 5, "h": 7.5}""".fromJson(JShape)
+  echo ""
+
+  echo "Doing JShape with rect"
+  echo """{"kind": "skRect", "pos": "(12, 34)", "w": "boxWidth", "h": "boxHeight"}""".fromJson(JShape)
+  echo ""
+
   echo "Doing doc from file"
   echo readFile("data.json").fromJson(JDoc)
   echo ""
@@ -102,42 +125,10 @@ except Exception as e:
   echo e.msg
   echo e.getStackTrace()
 
-
-# proc newRefInt(name: string, val: int): ref JVal =
-#   let iref = new int
-#   iref[] = val
-#   #result = new RefVal
-#   result = new JVal
-#   result[] = JVal(kind: rkInt, name: name, intVal: iref)
-
-# proc newRefFloat(name: string, val: float): ref JVal =
-#   let fref = new float
-#   fref[] = val
-#   #result = new RefVal
-#   result = new JVal
-#   result[] = JVal(kind: rkFloat, name: name, floatVal: fref)
-
-# proc `$`(jvalRef: ref JVal): string =
-#   result = jvalRef.name & ": "
-#   case jvalRef.kind
-#   of rkInt: result = result & $jvalRef.intVal
-#   of rkFloat: result = result & $jvalRef.floatVal
-
-
-# var varTableRef = new VarTable
-
-# var j = str.parseJson() # -> JSonNode
-# for varName, varDesc in j["vars"]:
-#   let val: JSonNode = varDesc["value"]
-#   case varDesc["type"].getStr
-#   of "int":
-#     varTableRef[varName] = newRefInt(varName, val.getInt)
-#   of "float":
-#     varTableRef[varName] = newRefFloat(varName, val.getFloat)
-
-# echo varTableRef["myvar1"]
-# echo varTableRef["myvar2"]
-# echo varTableRef["myvar3"]
+# var doc = readFile("data.json").fromJson(JDoc)
+# echo "\nPrinting table of vars:"
+# for k,v in doc.vars:
+#   echo k, ": ", v 
 
 
 
