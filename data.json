@@ -1,29 +1,14 @@
 { "vars": {
-    "junk1": 3.1415926,
-    "junk2": -3.1415926,
-    "junk3": +3.1415926,
-    "junk4": +1e23,
-    "junk5": -1e-23,
-    "junk6": -1.23e-23,
-    "junk7": +1.23e-23,
-    "junk8": -1.23e23,
-    "junk9": +1.23e23,
+    "hello":  45,
+    "boxHeight": "$hello",
+    "someText": "goodbye"
   },
   "shapes": {
     "line1": {
+      "text": "$someText",
       "kind": "skLine",
-      "pt0": "(12, 34)",
+      "pt0": "($boxHeight, $hello)",
       "pt1": "(56, 78)"
-    },
-    "line2": {
-      "kind": "skPolyLine",
-      "pts": ["(12, 34)", "(var1, 78)", "(someX, someY)"]
-    },
-    "rect1": {
-      "kind": "skRect",
-      "pos": "(12, 34)",
-      "w": "boxWidth",
-      "h": "boxHeight",
     }
   }
 }

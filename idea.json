@@ -1,33 +1,27 @@
-{
-  "vars": {
-    "myvar1": {
-      "kind": "vkFloat",
-      "floatVal": 3.5
-    },
-    "myvar2": {
-      "kind": "vkInt",
-      "intVal": 6
-    },
-    "myvar3": {
-      "kind": "vkString",
-      "strVal": "monkeys"
-    },
-    "myvar4": {
-      "kind": "vkString",
-      "strVal": "horses"
-    }
+{ "vars": {
+    "var1":  45,
+    "someX": 15,
+    "someY": 16,
+    "junk4":  "$var1",
+    "boxWidth":  99.9,
+    "boxHeight": "$junk6",
+    "junk5": "Some other"
   },
   "shapes": {
-    "rect1": {
-      "kind": "skRect",
-      "pos": (10, 20),
-      "w": 10.2,
-      "h": 11.4
-    },
     "line1": {
       "kind": "skLine",
-      "pt0": ("myvar1", 2),
-      "pt1": (3, 4)
+      "pt0": "(12, 34)",
+      "pt1": "(56, 78)"
+    },
+    "line2": {
+      "kind": "skPolyLine",
+      "pts": ["(12, 34)", "($var1, 78)", "($someX, $someY)"]
+    },
+    "rect1": {
+      "kind": "skRect",
+      "pos": "(10, 67)",
+      "w": "$boxWidth",
+      "h": "$boxHeight"
     }
   }
 }
