@@ -11,6 +11,8 @@ type
     of vkString: strVal: ref string
   JPoint = object
     x, y: JVal
+  JSize = object
+    w, h: JVal
   # Looks like the first enum must not be allowed to match the
   # first field of the variant type else strange bug occurs
   ShapeKind = enum skRect, skLine, skPolyLine
@@ -20,7 +22,7 @@ type
     case kind: ShapeKind
     of skRect:
       pos: JPoint
-      w, h: JVal
+      size: JSize
     of skLine:
       pt0: JPoint
       pt1: JPoint
@@ -47,8 +49,12 @@ type
     pts: seq[Point]
   ShapeTable = Table[string, Shape]
 
-proc `$`(x: ref SomeNumber): string = "→" & $x[]
-proc `$`(x: ref string): string = "→\"" & x[] & "\""
+proc `$`(x: ref SomeNumber): string =
+  if x.isNil: "nil"
+  else: "→" & $x[]
+proc `$`(x: ref string): string =
+  if x.isNil: "nil"
+  else: "→\"" & x[] & "\""
 proc `$`(x: JVal): string =
   result = $x.kind & ": "
   case x.kind
@@ -83,7 +89,7 @@ proc parseHook(s: string, i: var int, val: var JVal) =
       val = JVal(kind: vkInt, intVal: xref)
   except Exception:
     # Didn't parse as number, try parsing as string with optional quotes
-    # Copied with minor modifications from parseSymbol in jsony.nim
+    # Inspired by parseSymbol in jsony.nim
     var inQuote = s[i] == '"'
     if inQuote: inc i
     var j = i
@@ -94,7 +100,6 @@ proc parseHook(s: string, i: var int, val: var JVal) =
       inc i
     var xref = new string
     xref[] = s[j ..< i].strip()
-    #echo "got string: ->", xref[], "<-"
     if inQuote: inc i
     val = JVal(kind: vkString, strVal: xref)
 
@@ -109,6 +114,18 @@ proc parseHook(s: string, i: var int, val: var JPoint) =
   eatChar(s, i, ')')
   eatChar(s, i, '"')
   val = JPoint(x: x, y: y)
+
+proc parseHook(s: string, i: var int, val: var JSize) =
+  # Parse (w, h)
+  var w, h: JVal
+  eatChar(s, i, '"')
+  eatChar(s, i, '(')
+  parseHook(s, i, w)
+  eatChar(s, i, ',')
+  parseHook(s, i, h)
+  eatChar(s, i, ')')
+  eatChar(s, i, '"')
+  val = JSize(w: w, h: h)
 
 proc tests() = 
   try:
@@ -221,8 +238,8 @@ proc resolveVals(shape: var JShape, vars: JVarTable) =
   of skRect:
     resolveVal(shape.pos.x, vars, {vkInt, vkFloat})
     resolveVal(shape.pos.y, vars, {vkInt, vkFloat})
-    resolveVal(shape.w, vars, {vkInt, vkFloat})
-    resolveVal(shape.h, vars, {vkInt, vkFloat})
+    resolveVal(shape.size.w, vars, {vkInt, vkFloat})
+    resolveVal(shape.size.h, vars, {vkInt, vkFloat})
   of skLine:
     resolveVal(shape.pt0.x, vars, {vkInt, vkFloat})
     resolveVal(shape.pt0.y, vars, {vkInt, vkFloat})
@@ -240,18 +257,18 @@ proc toFloat(x: JVal): float =
   else: raise newException(ValueError, "Expected number but got " & $x )
 
 proc nameShapes(doc: var JDoc) =
-  for key, jshape in doc.shapes.mpairs:
-    jshape.name = key
+  for name, jshape in doc.shapes.mpairs:
+    jshape.name = name
 
 proc newShape(jshape: JShape): Shape =
-  # Create a real shope from JShape with all variables resolved
+  # Create a real shape from JShape with all variables resolved
   case jshape.kind:
   of skRect:
     var res = new Rect
     res.name = jshape.name
     res.text = jshape.text
     res.pos = (jshape.pos.x.toFloat, jshape.pos.y.toFloat)
-    res.size = (jshape.w.toFloat, jshape.h.toFloat)
+    res.size = (jshape.size.w.toFloat, jshape.size.h.toFloat)
     result = res
   of skLine:
     var res = new Line
@@ -268,26 +285,22 @@ proc newShape(jshape: JShape): Shape =
       res.pts.add((pt.x.toFloat, pt.y.toFloat))
     result = res
 
-try:
-  #tests()
-  var doc = readFile("data.json").fromJson(JDoc)
-  nameShapes(doc)
-
-  echo "table count": doc.shapes.len
+proc shapesFromFile*(filename: string): ref ShapeTable =
+  var doc = readFile(filename).fromJson(JDoc)
+  doc.nameShapes()
   for jshape in doc.shapes.mvalues:
     resolveVals(jshape, doc.vars)
-
-  #var shapeTable = new ShapeTable
+  result = new ShapeTable
   for jshape in doc.shapes.values:
-    #echo jshape
-    var shape = newShape(jshape)
-    # #shapeTable[shape.name] = shape
-    echo shape
+    result[jshape.name] = newShape(jshape)
 
-
-except Exception as e:
-  echo e.msg
-  echo e.getStackTrace()
+when isMainModule:
+  try:
+    tests()
+    echo shapesFromFile("data.json")
+  except Exception as e:
+    echo e.msg
+    echo e.getStackTrace()
 
 
 

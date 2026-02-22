@@ -24,8 +24,7 @@
     "rect1": {
       "kind": "skRect",
       "pos": "($someX, $someY)",
-      "w": "$boxWidth",
-      "h": "$boxHeight",
+      "size": "($boxWidth, $boxHeight)",
       "text": "$text3"
     }
   }
