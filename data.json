@@ -1,14 +1,32 @@
 { "vars": {
-    "hello":  45,
-    "boxHeight": "$hello",
-    "someText": "goodbye"
+    "var1":  80.0,
+    "var2":  60.0,
+    "someX": 15.0,
+    "someY": 16,
+    "boxWidth":  "$var1",
+    "boxHeight": "$var2",
+    "text1": "The Line1",
+    "text2": "The PolyLine1",
+    "text3": "The Rect1"
   },
   "shapes": {
     "line1": {
-      "text": "$someText",
       "kind": "skLine",
-      "pt0": "($boxHeight, $hello)",
-      "pt1": "(56, 78)"
+      "pt0": "(12, 34)",
+      "pt1": "(56, 78)",
+      "text": "$text1"
+    },
+    "line2": {
+      "kind": "skPolyLine",
+      "pts": ["(12, 34)", "(78, 56)", "($someX, $someY)"],
+      "text": "$text2"  
+    },
+    "rect1": {
+      "kind": "skRect",
+      "pos": "($someX, $someY)",
+      "w": "$boxWidth",
+      "h": "$boxHeight",
+      "text": "$text3"
     }
   }
 }
