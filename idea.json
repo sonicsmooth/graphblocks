@@ -1,27 +1,44 @@
-{ "vars": {
-    "var1":  45,
-    "someX": 15,
+{
+  "vars": {
+    "var1": 80.0,
+    "var2": 60.0,
+    "someX": 15.0,
     "someY": 16,
-    "junk4":  "$var1",
-    "boxWidth":  99.9,
-    "boxHeight": "$junk6",
-    "junk5": "Some other"
+    "boxWidth": "$var1",
+    "boxHeight": "$var2",
+    "text1": "The Line1",
+    "text2": "The PolyLine1",
+    "text3": "The Rect1"
   },
   "shapes": {
     "line1": {
       "kind": "skLine",
       "pt0": "(12, 34)",
-      "pt1": "(56, 78)"
+      "pt1": "(56, 78)",
+      "text": "$text1",
+      "penColor": "0xff00ff"
     },
     "line2": {
       "kind": "skPolyLine",
-      "pts": ["(12, 34)", "($var1, 78)", "($someX, $someY)"]
+      "pts": [
+        "(12, 34)",
+        "(78, 56)",
+        "($someX, $someY)"
+      ],
+      "text": "$text2",
+      "penColor": "0x00ff00"
     },
     "rect1": {
       "kind": "skRect",
-      "pos": "(10, 67)",
-      "w": "$boxWidth",
-      "h": "$boxHeight"
+      "pos": "($someX, $someY)",
+      "size": "($boxWidth, $boxHeight)",
+      "text": "$text3",
+      "penColor": "0xffff00",
+      "fillColor": "0x00ffff"
+    },
+    "rect2": {
+      "name": "what",
+      "refTo": "rect1"
     }
   }
 }

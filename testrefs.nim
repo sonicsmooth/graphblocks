@@ -1,8 +1,8 @@
-import std/[json, sets, strutils, tables]
+import std/[json, sets, sequtils, strutils, tables]
 import jsony
 
 type
-  # Types related to JSON intermediate representation. 
+  # Types related to JSON intermediate representation.
   JVarKind = enum vkInt, vkFloat, vkString
   JVal = object
     case kind: JVarKind
@@ -19,10 +19,13 @@ type
   JShape = object
     name: string
     text: string
+    penColor: string
+    refTo: string
     case kind: ShapeKind
     of skRect:
       pos: JPoint
       size: JSize
+      fillColor: string
     of skLine:
       pt0: JPoint
       pt1: JPoint
@@ -33,19 +36,21 @@ type
   JDoc = object
     vars: JVarTable
     shapes: JShapeTable
-  
+
   # Real objects
-  Point = tuple[x,y: float]
-  Size = tuple[w,h: float]
+  Point = tuple[x, y: float]
+  Size = tuple[w, h: float]
   Shape = ref object of RootObj
     name: string
     text: string
+    penColor: string
   Rect = ref object of Shape
     pos: Point
     size: Size
+    fillColor: string
   Line = ref object of Shape
     pt0, pt1: Point
-  PolyLine = ref object of Shape  
+  PolyLine = ref object of Shape
     pts: seq[Point]
   ShapeTable = Table[string, Shape]
 
@@ -64,11 +69,22 @@ proc `$`(x: JVal): string =
 method `$`(x: Shape): string {.base.} =
   "Base method"
 method `$`(x: Rect): string =
-  "Rect(name: \"" & x.name & "\", text: \"" & x.text & "\", pos: (" & $x.pos.x & ", " & $x.pos.y & "), size: (" & $x.size.w & ", " & $x.size.h & "))"
-method `$`(x: Line): string = 
-  "Line(name: \"" & x.name & "\", text: \"" & x.text & "\", pt0: (" & $x.pt0.x & ", " & $x.pt0.y & "), pt1: (" & $x.pt1.x & ", " & $x.pt1.y & "))"
+  result = "Rect(name: \"" & x.name & "\", "
+  result &= "text: \"" & x.text & "\", "
+  result &= "pos: (" & $x.pos.x & ", " & $x.pos.y & "), "
+  result &= "size: (" & $x.size.w & ", " & $x.size.h & "), "
+  result &= "penColor: \"" & x.penColor & "\", "
+  result &= "fillColor: \"" & x.fillColor & "\")"
+method `$`(x: Line): string =
+  result = "Line(name: \"" & x.name & "\", "
+  result &= "text: \"" & x.text & "\", "
+  result &= "pt0: (" & $x.pt0.x & ", " & $x.pt0.y & "), "
+  result &= "pt1: (" & $x.pt1.x & ", " & $x.pt1.y & "), "
+  result &= "penColor: \"" & x.penColor & "\")"
 method `$`(x: PolyLine): string =
-  "PolyLine(name: \"" & x.name & "\", text: \"" & x.text & "\", pts: " & $x.pts & ")"
+  result = "PolyLine(name: \"" & x.name & "\", text: \"" & x.text &
+      "\", pts: " & $x.pts & ", "
+  result &= "penColor: \"" & x.penColor & "\")"
 
 
 
@@ -94,7 +110,7 @@ proc parseHook(s: string, i: var int, val: var JVal) =
     if inQuote: inc i
     var j = i
     while i < s.len:
-      if (inQuote and s[i] == '"') or 
+      if (inQuote and s[i] == '"') or
          (s[i] in {')', ',', '\t', '\n', '\r'}):
         break
       inc i
@@ -127,79 +143,83 @@ proc parseHook(s: string, i: var int, val: var JSize) =
   eatChar(s, i, '"')
   val = JSize(w: w, h: h)
 
-proc tests() = 
+proc number_tests() =
   try:
-      echo "Doing JVal"
-      echo """ 42 """.fromJson(JVal)
-      echo """ +42 """.fromJson(JVal)
-      echo """ -42 """.fromJson(JVal)
-      echo """ 42e5 """.fromJson(JVal)
-      echo """ +42e5 """.fromJson(JVal)
-      echo """ -42e5 """.fromJson(JVal)
-      echo """ 42e+5 """.fromJson(JVal)
-      echo """ +42e+5 """.fromJson(JVal)
-      echo """ -42e+5 """.fromJson(JVal)
-      echo """ 42e-5 """.fromJson(JVal)
-      echo """ +42e-5 """.fromJson(JVal)
-      echo """ -42e-5 """.fromJson(JVal)
+    echo "Doing JVal"
+    echo """ 42 """.fromJson(JVal)
+    echo """ +42 """.fromJson(JVal)
+    echo """ -42 """.fromJson(JVal)
+    echo """ 42e5 """.fromJson(JVal)
+    echo """ +42e5 """.fromJson(JVal)
+    echo """ -42e5 """.fromJson(JVal)
+    echo """ 42e+5 """.fromJson(JVal)
+    echo """ +42e+5 """.fromJson(JVal)
+    echo """ -42e+5 """.fromJson(JVal)
+    echo """ 42e-5 """.fromJson(JVal)
+    echo """ +42e-5 """.fromJson(JVal)
+    echo """ -42e-5 """.fromJson(JVal)
 
-      echo """  19.0 """.fromJson(JVal)
-      echo """ +19.0 """.fromJson(JVal)
-      echo """ -19.0 """.fromJson(JVal)
-      echo """  19.0e5 """.fromJson(JVal)
-      echo """ +19.0e5 """.fromJson(JVal)
-      echo """ -19.0e5 """.fromJson(JVal)
-      echo """  19.0e+5 """.fromJson(JVal)
-      echo """ +19.0e+5 """.fromJson(JVal)
-      echo """ -19.0e+5 """.fromJson(JVal)
-      echo """  19.0e-5 """.fromJson(JVal)
-      echo """ +19.0e-5 """.fromJson(JVal)
-      echo """ -19.0e-5 """.fromJson(JVal)
+    echo """  19.0 """.fromJson(JVal)
+    echo """ +19.0 """.fromJson(JVal)
+    echo """ -19.0 """.fromJson(JVal)
+    echo """  19.0e5 """.fromJson(JVal)
+    echo """ +19.0e5 """.fromJson(JVal)
+    echo """ -19.0e5 """.fromJson(JVal)
+    echo """  19.0e+5 """.fromJson(JVal)
+    echo """ +19.0e+5 """.fromJson(JVal)
+    echo """ -19.0e+5 """.fromJson(JVal)
+    echo """  19.0e-5 """.fromJson(JVal)
+    echo """ +19.0e-5 """.fromJson(JVal)
+    echo """ -19.0e-5 """.fromJson(JVal)
 
-      echo """  21.1 """.fromJson(JVal)
-      echo """ +21.1 """.fromJson(JVal)
-      echo """ -21.1 """.fromJson(JVal)
-      echo """  21.1e5 """.fromJson(JVal)
-      echo """ +21.1e5 """.fromJson(JVal)
-      echo """ -21.1e5 """.fromJson(JVal)
-      echo """  21.1e+5 """.fromJson(JVal)
-      echo """ +21.1e+5 """.fromJson(JVal)
-      echo """ -21.1e+5 """.fromJson(JVal)
-      echo """  21.1e-5 """.fromJson(JVal)
-      echo """ +21.1e-5 """.fromJson(JVal)
-      echo """ -21.1e-5 """.fromJson(JVal)
+    echo """  21.1 """.fromJson(JVal)
+    echo """ +21.1 """.fromJson(JVal)
+    echo """ -21.1 """.fromJson(JVal)
+    echo """  21.1e5 """.fromJson(JVal)
+    echo """ +21.1e5 """.fromJson(JVal)
+    echo """ -21.1e5 """.fromJson(JVal)
+    echo """  21.1e+5 """.fromJson(JVal)
+    echo """ +21.1e+5 """.fromJson(JVal)
+    echo """ -21.1e+5 """.fromJson(JVal)
+    echo """  21.1e-5 """.fromJson(JVal)
+    echo """ +21.1e-5 """.fromJson(JVal)
+    echo """ -21.1e-5 """.fromJson(JVal)
+  except Exception as e:
+    echo e.msg
+    echo e.getStackTrace()
 
-      echo "Doing JPoint"
-      echo """ "(1, 2)"  """.fromJson(JPoint)
-      echo ""
+proc object_tests() =
+  try:
+    echo "Doing JPoint"
+    echo """ "(1, 2)"  """.fromJson(JPoint)
+    echo ""
 
-      echo "Doing seq of JPoints"
-      echo """ ["(1, 2)", "(3, 4)"]  """.fromJson(seq[JPoint])
-      echo ""
+    echo "Doing seq of JPoints"
+    echo """ ["(1, 2)", "(3, 4)"]  """.fromJson(seq[JPoint])
+    echo ""
 
-      echo "Doing JShape with line"
-      echo """{"kind": "skLine", "pt0": "(1, 2)", "pt1": "(3, 4)"}""".fromJson(JShape)
-      echo ""
+    echo "Doing JShape with line"
+    echo """{"kind": "skLine", "pt0": "(1, 2)", "pt1": "(3, 4)"}""".fromJson(JShape)
+    echo ""
 
-      echo "Doing JShape with polyline"
-      echo """{"kind": "skPolyLine", "pts": ["(1, 2)", "(3, 4)"]}""".fromJson(JShape)
-      echo ""
+    echo "Doing JShape with polyline"
+    echo """{"kind": "skPolyLine", "pts": ["(1, 2)", "(3, 4)"]}""".fromJson(JShape)
+    echo ""
 
-      echo "Doing JShape with polyline"
-      echo """{"kind": "skPolyLine", "pts": ["(1.5, 2.5)", "($var1, $var2)"]}""".fromJson(JShape)
-      echo ""
+    echo "Doing JShape with polyline"
+    echo """{"kind": "skPolyLine", "pts": ["(1.5, 2.5)", "($var1, $var2)"]}""".fromJson(JShape)
+    echo ""
 
-      echo "Doing JShape with rect"
-      echo """{"kind": "skRect", "pos": "(12, 34)", "w": 5, "h": 7.5}""".fromJson(JShape)
-      echo ""
+    echo "Doing JShape with rect"
+    echo """{"kind": "skRect", "pos": "(12, 34)", "w": 5, "h": 7.5}""".fromJson(JShape)
+    echo ""
 
-      echo "Doing JShape with rect"
-      echo """{"kind": "skRect", "pos": "(12, 34)", "w": "boxWidth", "h": "boxHeight"}""".fromJson(JShape)
-      echo ""
+    echo "Doing JShape with rect"
+    echo """{"kind": "skRect", "pos": "(12, 34)", "w": "boxWidth", "h": "boxHeight"}""".fromJson(JShape)
+    echo ""
 
-      echo "Doing doc from file"
-      echo readFile("data.json").fromJson(JDoc)
-      echo ""
+    echo "Doing JShape without kind"
+    echo """{"name": "hello"}""".fromJson(JShape)
 
   except Exception as e:
     echo e.msg
@@ -231,15 +251,17 @@ proc resolveVal(val: var string, vars: JVarTable) =
       of vkString: val = resolvedVal.strVal[]
     else:
       echo "Variable ", varName, " not defined2"
- 
+
 proc resolveVals(shape: var JShape, vars: JVarTable) =
   resolveVal(shape.text, vars)
+  resolveVal(shape.penColor, vars)
   case shape.kind:
   of skRect:
     resolveVal(shape.pos.x, vars, {vkInt, vkFloat})
     resolveVal(shape.pos.y, vars, {vkInt, vkFloat})
     resolveVal(shape.size.w, vars, {vkInt, vkFloat})
     resolveVal(shape.size.h, vars, {vkInt, vkFloat})
+    resolveVal(shape.fillColor, vars)
   of skLine:
     resolveVal(shape.pt0.x, vars, {vkInt, vkFloat})
     resolveVal(shape.pt0.y, vars, {vkInt, vkFloat})
@@ -252,9 +274,13 @@ proc resolveVals(shape: var JShape, vars: JVarTable) =
 
 proc toFloat(x: JVal): float =
   case x.kind
-  of vkInt: result = float(x.intVal[])
-  of vkFloat: result = x.floatVal[]
-  else: raise newException(ValueError, "Expected number but got " & $x )
+  of vkInt: result =
+    if x.intVal.isNil: 0.0
+    else: float(x.intVal[])
+  of vkFloat: result =
+    if x.floatVal.isNil: 0.0
+    else: x.floatVal[]
+  else: raise newException(ValueError, "Expected number but got " & $x)
 
 proc nameShapes(doc: var JDoc) =
   for name, jshape in doc.shapes.mpairs:
@@ -267,6 +293,8 @@ proc newShape(jshape: JShape): Shape =
     var res = new Rect
     res.name = jshape.name
     res.text = jshape.text
+    res.penColor = jshape.penColor
+    res.fillColor = jshape.fillColor
     res.pos = (jshape.pos.x.toFloat, jshape.pos.y.toFloat)
     res.size = (jshape.size.w.toFloat, jshape.size.h.toFloat)
     result = res
@@ -274,6 +302,7 @@ proc newShape(jshape: JShape): Shape =
     var res = new Line
     res.name = jshape.name
     res.text = jshape.text
+    res.penColor = jshape.penColor
     res.pt0 = (jshape.pt0.x.toFloat, jshape.pt0.y.toFloat)
     res.pt1 = (jshape.pt1.x.toFloat, jshape.pt1.y.toFloat)
     result = res
@@ -281,9 +310,13 @@ proc newShape(jshape: JShape): Shape =
     var res = new PolyLine
     res.name = jshape.name
     res.text = jshape.text
+    res.penColor = jshape.penColor
     for pt in jshape.pts:
       res.pts.add((pt.x.toFloat, pt.y.toFloat))
     result = res
+
+proc isBlank(shape: Shape): bool =
+  shape.name == "" and shape.text == "" and shape.penColor == ""
 
 proc shapesFromFile*(filename: string): ref ShapeTable =
   var doc = readFile(filename).fromJson(JDoc)
@@ -292,15 +325,21 @@ proc shapesFromFile*(filename: string): ref ShapeTable =
     resolveVals(jshape, doc.vars)
   result = new ShapeTable
   for jshape in doc.shapes.values:
-    result[jshape.name] = newShape(jshape)
+    if jshape.refTo.len > 0:
+      result[jshape.name] = result[jshape.refTo]
+      
+      #result[jshape.name].name = jshape.name # override name with current shape's name
+    else:
+      result[jshape.name] = newShape(jshape)
 
 when isMainModule:
   try:
-    tests()
-    echo shapesFromFile("data.json")
+    #number_tests()
+    #object_tests()
+    let shapeTable = shapesFromFile("data.json")
+    shapeTable["line1"].penColor = "red"
+    for kee, shape in shapeTable:
+      echo kee, ": ", shape
   except Exception as e:
     echo e.msg
     echo e.getStackTrace()
-
-
-

@@ -1,31 +1,18 @@
-{ "vars": {
-    "var1":  80.0,
-    "var2":  60.0,
-    "someX": 15.0,
-    "someY": 16,
-    "boxWidth":  "$var1",
-    "boxHeight": "$var2",
-    "text1": "The Line1",
-    "text2": "The PolyLine1",
-    "text3": "The Rect1"
+{
+  "vars": {
+    "var1": 80.0,
+    "text1": "random text"
   },
   "shapes": {
     "line1": {
       "kind": "skLine",
       "pt0": "(12, 34)",
       "pt1": "(56, 78)",
-      "text": "$text1"
+      "text": "$text1",
+      "penColor": "0xff00ff"
     },
     "line2": {
-      "kind": "skPolyLine",
-      "pts": ["(12, 34)", "(78, 56)", "($someX, $someY)"],
-      "text": "$text2"  
-    },
-    "rect1": {
-      "kind": "skRect",
-      "pos": "($someX, $someY)",
-      "size": "($boxWidth, $boxHeight)",
-      "text": "$text3"
+      "refTo": "line1"
     }
   }
 }
